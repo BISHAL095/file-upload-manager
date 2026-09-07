@@ -1,4 +1,5 @@
-import { useReducer } from 'react';
+import { useReducer, useRef } from 'react';
+import { fakeUpload } from '../utils/fakeUpload';
 
 const initialState = {
   files: [] 
@@ -46,5 +47,53 @@ function fileReducer(state, action) {
 
 export function useFileUpload() {
   const [state, dispatch] = useReducer(fileReducer, initialState);
-  return { files: state.files, dispatch };
+  const controllersRef = useRef({});
+
+  function startUpload(fileId) {
+    const fileItem = state.files.find(file => file.id === fileId);
+    if (!fileItem) return;
+
+    const controller = fakeUpload({
+      onProgress: (progress) => {
+        dispatch({
+          type: 'UPDATE_FILE_STATUS',
+          payload: { id: fileId,status: 'Uploading', progress }
+        });
+      },
+      onComplete: () => {
+        dispatch({
+          type: 'UPDATE_FILE_STATUS',
+          payload: { id: fileId, status: 'Completed', progress: 100, error: null }
+        });
+      },
+      onError: (error) => {
+        dispatch({
+          type: 'UPDATE_FILE_STATUS',
+          payload: { id: fileId, status: 'Failed', error }
+        });
+      }
+    });
+
+    controllersRef.current[fileId] = controller;
+  } 
+  function cancelUpload(fileId) {
+    const controller = controllersRef.current[fileId];
+    if (controller) {
+      controller.cancel();
+      dispatch({ type: 'REMOVE_FILE', payload: { id: fileId } });
+      delete controllersRef.current[fileId];
+    }
+  }
+  function retryUpload(fileId){
+    const fileItem = state.files.find(file => file.id === fileId);
+    if (fileItem) {
+      dispatch({
+        type: 'UPDATE_FILE_STATUS',
+        payload: { id: fileId, status: 'Pending', progress: 0, error: null }
+      });
+      startUpload(fileId);
+    }   
+  }
+
+  return { files: state.files, dispatch, startUpload, cancelUpload, retryUpload };
 }
