@@ -10,17 +10,22 @@ function App() {
   };
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>File Upload Manager</h1>
+    <div className="app">
+      <header className="app-header">
+        <div className="app-header-brand"><span className="brand-mark" aria-hidden="true" /> File Upload Manager</div>
+        <p>Upload and manage your files in one place.</p>
+      </header>
 
       <UploadZone onFilesSelected={handleFilesAdded} />
 
-      <FileList
-        files={files}
-        onStart={startUpload}
-        onCancel={cancelUpload}
-        onRetry={retryUpload}
-      />
+      <div className="file-list">
+        <FileList
+          files={files}
+          onStart={startUpload}
+          onCancel={cancelUpload}
+          onRetry={retryUpload}
+        />
+      </div>
     </div>
   );
 }

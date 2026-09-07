@@ -2,27 +2,31 @@ import formatBytes from '../utils/formatBytes';
 
 export default function FileItem({ file, onStart, onCancel, onRetry }) {
   return (
-    <div>
-      <strong>{file.name}</strong> — {file.status} — {file.progress}% - {formatBytes(file.size)}
-      {file.error && <span style={{ color: 'red' }}> ({file.error})</span>}
-
-     {file.status !== 'Completed' && file.progress > 0 && (
-        <div style={{ background: '#eee', height: 8, width: '100%' }}>
-          <div style={{ background: '#4caf50', height: '100%', width: `${file.progress}%` }} />
-        </div>
-      )}
-
-      <div>
+    <div className={`file-item status-${file.status.toLowerCase()}`}>
+      <div className="file-item-name">
+        <span className="file-type-icon">{file.name.includes('.') ? '▤' : '□'}</span>
+        <strong title={file.name}>{file.name}</strong>
+      </div>
+      <div className="file-item-status">
+        <span className="status-dot" />
+        <span>{file.status}</span>
+        <span className="progress-label">{file.progress}% · {formatBytes(file.size)}</span>
+      </div>
+      <div className="file-item-action">
         {file.status === 'Pending' && (
-          <button onClick={() => onStart(file.id)}>Start</button>
+          <button className="file-action" onClick={() => onStart(file.id)}>Start</button>
         )}
         {file.status === 'Uploading' && (
-          <button onClick={() => onCancel(file.id)}>Cancel</button>
+          <button className="file-action danger" onClick={() => onCancel(file.id)}>Cancel</button>
         )}
         {file.status === 'Failed' && (
-          <button onClick={() => onRetry(file.id)}>Retry</button>
+          <button className="file-action" onClick={() => onRetry(file.id)}>Retry</button>
         )}
       </div>
+      {file.error && <span className="file-error">({file.error})</span>}
+      {file.status !== 'Completed' && file.progress > 0 && (
+        <div className="file-progress-track"><div className="file-progress-fill" style={{ width: `${file.progress}%` }} /></div>
+      )}
     </div>
   );
 }

@@ -50,10 +50,20 @@ export { fileReducer };
 export function useFileUpload() {
   const [state, dispatch] = useReducer(fileReducer, initialState);
   const controllersRef = useRef({});
+  const MAX_CONCURRENT = 3;
+  const activeUploads = useRef(new Set());
+  const queue = useRef([]);
 
   function startUpload(fileId) {
     const fileItem = state.files.find(file => file.id === fileId);
+
     if (!fileItem) return;
+
+    if (activeUploads.current.size >= MAX_CONCURRENT) {
+        queue.current.push(() => startUpload(fileId));
+        return;
+    }
+    activeUploads.current.add(fileId);
 
     const controller = fakeUpload({
       onProgress: (progress) => {
@@ -67,12 +77,18 @@ export function useFileUpload() {
           type: 'UPDATE_FILE_STATUS',
           payload: { id: fileId, status: 'Completed', progress: 100, error: null }
         });
+        delete controllersRef.current[fileId];
+        activeUploads.current.delete(fileId);
+        processQueue();
       },
       onError: (error) => {
         dispatch({
           type: 'UPDATE_FILE_STATUS',
           payload: { id: fileId, status: 'Failed', error }
         });
+        delete controllersRef.current[fileId];
+        activeUploads.current.delete(fileId);
+        processQueue();
       }
     });
 
@@ -85,6 +101,8 @@ export function useFileUpload() {
       dispatch({ type: 'REMOVE_FILE', payload: { id: fileId } });
       delete controllersRef.current[fileId];
     }
+    activeUploads.current.delete(fileId);
+    processQueue();
   }
   function retryUpload(fileId){
     const fileItem = state.files.find(file => file.id === fileId);
@@ -96,6 +114,14 @@ export function useFileUpload() {
       startUpload(fileId);
     }   
   }
+  function processQueue() {
+    while (activeUploads.current.size < MAX_CONCURRENT && queue.current.length > 0) {
+      const next = queue.current.shift();
+      next();
+    }
+}
 
   return { files: state.files, dispatch, startUpload, cancelUpload, retryUpload };
 }
+
+
