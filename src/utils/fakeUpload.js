@@ -12,8 +12,7 @@ export function fakeUpload({ onProgress, onComplete, onError }) {
     if (progress >= 100) {
       clearInterval(intervalId);
 
-      const isSuccess = Math.random() > 0.2; // 80% chance of success
-
+      const isSuccess = Math.random() > 0.2; 
       if (isSuccess) {
         onComplete();
       } else {

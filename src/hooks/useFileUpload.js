@@ -45,6 +45,8 @@ function fileReducer(state, action) {
   }
 }
 
+export { fileReducer };
+
 export function useFileUpload() {
   const [state, dispatch] = useReducer(fileReducer, initialState);
   const controllersRef = useRef({});
