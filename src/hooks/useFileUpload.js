@@ -28,7 +28,7 @@ function fileReducer(state, action) {
                 ...file,
                 status: status ?? file.status,
                 progress: progress ?? file.progress,
-                error: error ?? file.error
+                error: error
             }
             : file
           )
@@ -57,7 +57,7 @@ export function useFileUpload() {
       onProgress: (progress) => {
         dispatch({
           type: 'UPDATE_FILE_STATUS',
-          payload: { id: fileId,status: 'Uploading', progress }
+          payload: { id: fileId,status: 'Uploading', progress, error: null }
         });
       },
       onComplete: () => {
