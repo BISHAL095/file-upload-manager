@@ -1,17 +1,26 @@
 import { useFileUpload } from './hooks/useFileUpload';
+import FileList from './components/FileList';
+import UploadZone from './components/UploadZone';
 
 function App() {
-  const { files, dispatch } = useFileUpload();
+  const { files, dispatch, startUpload, cancelUpload, retryUpload } = useFileUpload();
 
-  const handleFileSelect = (e) => {
-    dispatch({ type: 'ADD_FILES', payload: Array.from(e.target.files) });
+  const handleFilesAdded = (fileArray) => {
+    dispatch({ type: 'ADD_FILES', payload: fileArray });
   };
 
   return (
     <div style={{ padding: '2rem' }}>
       <h1>File Upload Manager</h1>
-      <input type="file" multiple onChange={handleFileSelect} />
-      <pre>{JSON.stringify(files, null, 2)}</pre>
+
+      <UploadZone onFilesSelected={handleFilesAdded} />
+
+      <FileList
+        files={files}
+        onStart={startUpload}
+        onCancel={cancelUpload}
+        onRetry={retryUpload}
+      />
     </div>
   );
 }
