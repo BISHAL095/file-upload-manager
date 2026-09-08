@@ -32,8 +32,10 @@ export default function UploadZone({ onFilesSelected }) {
       onDragLeave={handleDragLeave}
       onDrop={handleFileDrop}
     >
-      <span className="dropzone-icon">↑</span>
+      <div className="dropzone-content">
+      <span className="dropzone-icon">+</span>
       <span className="dropzone-label">Drop files here or click to select</span>
+      </div>
       <input type="file" multiple onChange={handleFileSelect} />
     </label>
   );    
